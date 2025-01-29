@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-client # Name of the deployment
+  labels:
+    app: client-app
+spec:
+  replicas: { { .Values.client.replicaCount } } # Set the number of replicas based on values.yaml
+  selector:
+    matchLabels:
+      app: client-app
+  strategy:
+    type: RollingUpdate # Rolling update strategy
+    rollingUpdate:
+      maxSurge: 1 # Max number of Pods to be created over the desired replicas
+      maxUnavailable: 1 # Max number of Pods that can be unavailable during the update
+  template:
+    metadata:
+      labels:
+        app: deployment-client
+    spec:
+      containers:
+        - name: client # Container name
+          imagePullPolicy: { { Values.client.image.pullPolicy } }
+          image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}" # Image from values.yaml
+          ports:
+            - containerPort: { { .Values.client.port } }
+          resources:
+            requests:
+              memory: "{{ .Values.default.resources.requests.memory }}"
+              cpu: "{{ .Values.default.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.default.resources.limits.memory }}"
+              cpu: "{{ .Values.default.resources.limits.cpu }}"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: { { .Values.client.port } }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 4
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: { { .Values.client.port } }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: { { .Values.client.port } }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 10

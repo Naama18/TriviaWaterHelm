@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-database # Name of the deployment
+  labels:
+    app: database-app
+spec:
+  replicas: { { .Values.database.replicaCount } } # Set the number of replicas based on values.yaml
+  selector:
+    matchLabels:
+      app: database-app
+  strategy:
+    type: RollingUpdate # Rolling update strategy
+    rollingUpdate:
+      maxSurge: 1 # Max number of Pods to be created over the desired replicas
+      maxUnavailable: 1 # Max number of Pods that can be unavailable during the update
+  template:
+    metadata:
+      labels:
+        app: deployment-database
+    spec:
+      containers:
+        - name: database
+        env: 
+        - name: DB_NAME
+          valueFrom:
+            configmapKeyRef:
+              name: configmap-db
+              key: DB_NAME
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secret-db
+              key: DB_PASSWORD
+        livenessProbe:
+          tcpSocket:
+            port: { { Values.database.port } }
+          imagePullPolicy: { { Values.database.image.pullPolicy } }
+          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}" # Image from values.yaml
+          ports:
+            - containerPort: { { .Values.database.port } }
+          resources:
+            requests:
+              memory: "{{ .Values.default.resources.requests.memory }}"
+              cpu: "{{ .Values.default.resources.requests.cpu }}"
+            limits:
+              memory: "{{ .Values.default.resources.limits.memory }}"
+              cpu: "{{ .Values.default.resources.limits.cpu }}"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: { { .Values.database.port } }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 4
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: { { .Values.database.port } }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: { { .Values.database.port } }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 7
+            failureThreshold: 10
