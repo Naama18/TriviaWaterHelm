@@ -5,10 +5,10 @@ metadata:
   labels:
     app: main-server-service
 spec:
-  type: { { .Values.server.service.type } }
+  type: {{ .Values.server.service.type }}
   ports:
-    - port: { { .Values.server.service.port } }
-      targetPort: { { .Values.server.port } }
+    - port: {{ .Values.server.service.port }}
+      targetPort: {{ .Values.server.port }}
       protocol: TCP
   selector:
     app: main-server-service

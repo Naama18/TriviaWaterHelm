@@ -5,7 +5,7 @@ metadata:
   labels:
     app: server-app
 spec:
-  replicas: { { .Values.server.replicaCount } } # Set the number of replicas based on values.yaml
+  replicas: {{ .Values.server.replicaCount }} # Set the number of replicas based on values.yaml
   selector:
     matchLabels:
       app: server-app
@@ -21,31 +21,31 @@ spec:
     spec:
       containers:
         - name: server # Container name
-        env: 
-        - name: DB_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: secret-db
-              key: DB_USERNAME
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: secret-db
-              key: DB_PASSWORD
-        - name: DB_NAME
-          valueFrom:
-            configmapKeyRef:
-              name: configmap-db
-              key: DB_NAME
-        - name: DB_HOST
-          valueFrom:
-            configKeyRef:
-              name: configmap-db
-              key: DB_HOST
-          imagePullPolicy: { { Values.server.image.pullPolicy } }
+          imagePullPolicy: {{ .Values.server.image.pullPolicy }} # Image pull policy
           image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}" # Image from values.yaml
           ports:
-            - containerPort: { { .Values.server.port } }
+            - containerPort: {{ .Values.server.port }}
+          env: 
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: DB_PASSWORD
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db
+                  key: DB_NAME
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db
+                  key: DB_HOST
           resources:
             requests:
               memory: "{{ .Values.default.resources.requests.memory }}"
@@ -56,7 +56,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: { { .Values.server.port } }
+              port: {{ .Values.server.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 4
@@ -64,7 +64,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /readiness
-              port: { { .Values.server.port } }
+              port: {{ .Values.server.port }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 4
@@ -72,7 +72,7 @@ spec:
           startupProbe:
             httpGet:
               path: /health
-              port: { { .Values.server.port } }
+              port: {{ .Values.server.port }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 7

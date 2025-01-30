@@ -5,10 +5,10 @@ metadata:
   labels:
     app: database-service
 spec:
-  type: { { .Values.database.service.type } }
+  type: {{ .Values.database.service.type }}
   ports:
-    - port: { { .Values.database.service.port } }
-      targetPort: { { .Values.database.port } }
+    - port: {{ .Values.database.service.port }}
+      targetPort: {{ .Values.database.port }}
       protocol: TCP
   selector:
     app: database-service

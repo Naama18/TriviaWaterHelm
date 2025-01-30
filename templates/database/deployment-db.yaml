@@ -5,7 +5,7 @@ metadata:
   labels:
     app: database-app
 spec:
-  replicas: { { .Values.database.replicaCount } } # Set the number of replicas based on values.yaml
+  replicas: {{ .Values.database.replicaCount }} # Set the number of replicas based on values.yaml
   selector:
     matchLabels:
       app: database-app
@@ -21,35 +21,31 @@ spec:
     spec:
       containers:
         - name: database
-        env: 
-        - name: DB_NAME
-          valueFrom:
-            configmapKeyRef:
-              name: configmap-db
-              key: DB_NAME
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: secret-db
-              key: DB_PASSWORD
-        livenessProbe:
-          tcpSocket:
-            port: { { Values.database.port } }
-          imagePullPolicy: { { Values.database.image.pullPolicy } }
-          image: "{{ .Values.database.image.repository }}:{{ .Values.database.image.tag }}" # Image from values.yaml
+          image: "{{ .Values.database.mysql.image.repository }}:{{ .Values.database.mysql.image.tag }}" # Image from values.yaml
           ports:
-            - containerPort: { { .Values.database.port } }
+            - containerPort: {{ .Values.database.port }}
+          env:
+            - name: DB_NAME
+              valueFrom:
+                configmapKeyRef:
+                  name: configmap-db
+                  key: DB_NAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: DB_PASSWORD
           resources:
             requests:
-              memory: "{{ .Values.default.resources.requests.memory }}"
-              cpu: "{{ .Values.default.resources.requests.cpu }}"
+              memory: {{ .Values.default.resources.requests.memory }}
+              cpu: {{ .Values.default.resources.requests.cpu }}
             limits:
-              memory: "{{ .Values.default.resources.limits.memory }}"
-              cpu: "{{ .Values.default.resources.limits.cpu }}"
+              memory: {{ .Values.default.resources.limits.memory }}
+              cpu: {{ .Values.default.resources.limits.cpu }}
           livenessProbe:
             httpGet:
               path: /health
-              port: { { .Values.database.port } }
+              port: {{ .Values.database.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 4
@@ -57,7 +53,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /readiness
-              port: { { .Values.database.port } }
+              port: {{ .Values.database.port }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 4
@@ -65,7 +61,7 @@ spec:
           startupProbe:
             httpGet:
               path: /health
-              port: { { .Values.database.port } }
+              port: {{ .Values.database.port }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 7
