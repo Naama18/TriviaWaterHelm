@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: client # Container name
-          imagePullPolicy: { { Values.client.image.pullPolicy } }
+          imagePullPolicy: { { .Values.client.image.pullPolicy } }
           image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}" # Image from values.yaml
           ports:
             - containerPort: { { .Values.client.port } }

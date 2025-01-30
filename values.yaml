@@ -8,6 +8,10 @@ default:
       cpu: "512m"
 
 client:
+  service: 
+    type: ClusterIP
+    port: 80
+  port: 5176
   image:
     repository: rivkayo/triviawater
     tag: 1.6
@@ -15,6 +19,10 @@ client:
   replicaCount: 3
 
 server:
+  service: 
+    type: ClusterIP
+    port: 8080
+  port: 2024
   image:
     repository: rivkayo/triviawaterserver
     tag: 1.1
@@ -22,6 +30,9 @@ server:
   replicaCount: 3
 
 database:
+  service: 
+    type: ClusterIP
+    port: 3306
   mysql:
     DB_HOST: localhost
     DB_PORT: 3306
