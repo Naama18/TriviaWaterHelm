@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "triviaWaterHelmChart.name" -}}
+{{- define "trivia-water-helm-chart.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "triviaWaterHelmChart.fullname" -}}
+{{- define "trivia-water-helm-chart.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "triviaWaterHelmChart.chart" -}}
+{{- define "trivia-water-helm-chart.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "triviaWaterHelmChart.labels" -}}
-helm.sh/chart: {{ include "triviaWaterHelmChart.chart" . }}
-{{ include "triviaWaterHelmChart.selectorLabels" . }}
+{{- define "trivia-water-helm-chart.labels" -}}
+helm.sh/chart: {{ include "trivia-water-helm-chart.chart" . }}
+{{ include "trivia-water-helm-chart.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "triviaWaterHelmChart.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "triviaWaterHelmChart.name" . }}
+{{- define "trivia-water-helm-chart.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "trivia-water-helm-chart.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "triviaWaterHelmChart.serviceAccountName" -}}
+{{- define "trivia-water-helm-chart.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "triviaWaterHelmChart.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "trivia-water-helm-chart.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

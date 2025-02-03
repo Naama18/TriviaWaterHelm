@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-server # Name of the deployment
+  name: server-app # Name of the deployment
   labels:
-    app: server-app
+    app: deployment-server
 spec:
   replicas: {{ .Values.server.replicaCount }} # Set the number of replicas based on values.yaml
   selector:
     matchLabels:
-      app: server-app
+      app: deployment-server
   strategy:
     type: RollingUpdate # Rolling update strategy
     rollingUpdate:

@@ -1,27 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-client # Name of the deployment
+  name: app-client # Name of the deployment
   labels:
     app: client-app
 spec:
-  replicas: {{ .Values.client.replicaCount }} # Set the number of replicas based on values.yaml
+  serviceAccountName: my-privileged-sa
+  automountServiceAccountToken: false
+  replicas: {{ .Values.client.replicaCount }}
   selector:
     matchLabels:
-      app: client-app
+      app: deployment-client
   strategy:
-    type: RollingUpdate # Rolling update strategy
+    type: RollingUpdate
     rollingUpdate:
-      maxSurge: 1 # Max number of Pods to be created over the desired replicas
-      maxUnavailable: 1 # Max number of Pods that can be unavailable during the update
+      maxSurge: 1
+      maxUnavailable: 1
   template:
     metadata:
       labels:
         app: deployment-client
     spec:
+      securityContext:
+        runAsUser: 0
       containers:
-        - name: client # Container name
-          image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}" # Image from values.yaml
+        - name: client
+          image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}"
           ports:
             - containerPort: {{ .Values.client.port }}
           resources:

@@ -8,7 +8,7 @@ spec:
   replicas: {{ .Values.database.replicaCount }} # Set the number of replicas based on values.yaml
   selector:
     matchLabels:
-      app: database-app
+      app: deployment-database
   strategy:
     type: RollingUpdate # Rolling update strategy
     rollingUpdate:
@@ -23,18 +23,19 @@ spec:
         - name: database
           image: "{{ .Values.database.mysql.image.repository }}:{{ .Values.database.mysql.image.tag }}" # Image from values.yaml
           ports:
-            - containerPort: {{ .Values.database.port }}
+            - containerPort: {{ .Values.database.mysql.DB_PORT }}
           env:
-            - name: DB_NAME
-              valueFrom:
-                configmapKeyRef:
-                  name: configmap-db
-                  key: DB_NAME
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: secret-db
-                  key: DB_PASSWORD
+                  name: secret-db          # Ensure the Secret 'secret-db' exists
+                  key: DB_PASSWORD         # Ensure the key 'DB_PASSWORD' exists in the Secret
+
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db       # Ensure the ConfigMap 'configmap-db' exists
+                  key: DB_NAME             # Ensure the key 'DB_NAME' exists in the ConfigMap
           resources:
             requests:
               memory: {{ .Values.default.resources.requests.memory }}
@@ -45,7 +46,7 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: {{ .Values.database.port }}
+              port: {{ .Values.database.mysql.DB_PORT }}
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 4
@@ -53,7 +54,7 @@ spec:
           readinessProbe:
             httpGet:
               path: /readiness
-              port: {{ .Values.database.port }}
+              port: {{ .Values.database.mysql.DB_PORT }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 4
@@ -61,7 +62,7 @@ spec:
           startupProbe:
             httpGet:
               path: /health
-              port: {{ .Values.database.port }}
+              port: {{ .Values.database.mysql.DB_PORT }}
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 7

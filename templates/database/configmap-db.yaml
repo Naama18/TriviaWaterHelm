@@ -2,10 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: configmap-db
-type: Opaque
+  type: Opaque
 data:
-  database:
-  mysql:
-    auth:
-      DB_PORT: 3306
-      DB_NAME: "trivia_water"
+  DB_PORT: "3306"
+  DB_NAME: "trivia_water"
