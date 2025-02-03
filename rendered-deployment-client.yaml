@@ -10,7 +10,7 @@ metadata:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: database-secret
+  name: secret-db
   type: Opaque
 data:
   DB_USERNAME: cm9vdA==
