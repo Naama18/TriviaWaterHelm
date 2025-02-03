@@ -5,8 +5,6 @@ metadata:
   labels:
     app: client-app
 spec:
-  serviceAccountName: my-privileged-sa
-  automountServiceAccountToken: false
   replicas: {{ .Values.client.replicaCount }}
   selector:
     matchLabels:
@@ -21,6 +19,8 @@ spec:
       labels:
         app: deployment-client
     spec:
+      serviceAccountName: my-privileged-sa
+      automountServiceAccountToken: false
       securityContext:
         runAsUser: 0
       containers:

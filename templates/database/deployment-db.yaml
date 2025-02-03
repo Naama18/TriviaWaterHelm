@@ -25,17 +25,31 @@ spec:
           ports:
             - containerPort: {{ .Values.database.mysql.DB_PORT }}
           env:
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: DB_USERNAME
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: secret-db          # Ensure the Secret 'secret-db' exists
-                  key: DB_PASSWORD         # Ensure the key 'DB_PASSWORD' exists in the Secret
-
+                  name: secret-db
+                  key: DB_PASSWORD
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: MYSQL_ROOT_PASSWORD
             - name: DB_NAME
               valueFrom:
                 configMapKeyRef:
-                  name: configmap-db       # Ensure the ConfigMap 'configmap-db' exists
-                  key: DB_NAME             # Ensure the key 'DB_NAME' exists in the ConfigMap
+                  name: configmap-db
+                  key: DB_NAME
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db
+                  key: DB_HOST 
           resources:
             requests:
               memory: {{ .Values.default.resources.requests.memory }}

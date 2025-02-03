@@ -6,3 +6,5 @@ metadata:
 data:
   DB_PORT: "3306"
   DB_NAME: "trivia_water"
+  DB_HOST: "localhost"
+

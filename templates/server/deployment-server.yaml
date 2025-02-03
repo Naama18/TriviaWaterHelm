@@ -19,6 +19,10 @@ spec:
       labels:
         app: deployment-server
     spec:
+      serviceAccountName: my-privileged-sa
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 0
       containers:
         - name: server # Container name
           imagePullPolicy: {{ .Values.server.image.pullPolicy }} # Image pull policy
@@ -36,6 +40,11 @@ spec:
                 secretKeyRef:
                   name: secret-db
                   key: DB_PASSWORD
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: MYSQL_ROOT_PASSWORD
             - name: DB_NAME
               valueFrom:
                 configMapKeyRef:
