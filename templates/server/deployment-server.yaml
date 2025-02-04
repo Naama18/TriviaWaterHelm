@@ -23,6 +23,8 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         runAsUser: 0
+        runAsGroup: 0
+        allowPrivilegeEscalation: true
       containers:
         - name: server # Container name
           imagePullPolicy: {{ .Values.server.image.pullPolicy }} # Image pull policy
