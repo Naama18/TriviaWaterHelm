@@ -5,10 +5,10 @@ metadata:
   labels:
     app: client-service
 spec:
+  selector:
+    app: client-app
   type: {{ .Values.client.service.type }}
   ports:
     - port: {{ .Values.client.service.port }}
       targetPort: {{ .Values.client.port }}
       protocol: TCP
-  selector:
-    app: client-service

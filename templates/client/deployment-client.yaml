@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-client # Name of the deployment
+  name: client-app # Name of the deployment
   labels:
     app: client-app
 spec:
   replicas: {{ .Values.client.replicaCount }}
   selector:
     matchLabels:
-      app: deployment-client
+      app: client-app
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -17,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-        app: deployment-client
+        app: client-app
     spec:
       serviceAccountName: my-privileged-sa
       automountServiceAccountToken: false
