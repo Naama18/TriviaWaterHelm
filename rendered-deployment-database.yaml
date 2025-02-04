@@ -158,14 +158,14 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-database # Name of the deployment
+  name: database-app # Name of the deployment
   labels:
     app: database-app
 spec:
   replicas: 1 # Set the number of replicas based on values.yaml
   selector:
     matchLabels:
-      app: deployment-database
+      app: database-app
   strategy:
     type: RollingUpdate # Rolling update strategy
     rollingUpdate:
@@ -174,7 +174,7 @@ spec:
   template:
     metadata:
       labels:
-        app: deployment-database
+        app: database-app
     spec:
       containers:
         - name: database

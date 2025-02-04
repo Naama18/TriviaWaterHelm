@@ -89,7 +89,7 @@ spec:
       targetPort: 2024
       protocol: TCP
   selector:
-    app: main-server-service
+    app: deployment-server
 ---
 # Source: trivia-water-helm-chart/templates/client/deployment-client.yaml
 apiVersion: apps/v1
@@ -158,14 +158,14 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deployment-database # Name of the deployment
+  name: database-app # Name of the deployment
   labels:
     app: database-app
 spec:
   replicas: 1 # Set the number of replicas based on values.yaml
   selector:
     matchLabels:
-      app: deployment-database
+      app: database-app
   strategy:
     type: RollingUpdate # Rolling update strategy
     rollingUpdate:
@@ -174,7 +174,7 @@ spec:
   template:
     metadata:
       labels:
-        app: deployment-database
+        app: database-app
     spec:
       containers:
         - name: database
@@ -270,7 +270,7 @@ spec:
       containers:
         - name: server # Container name
           imagePullPolicy:  # Image pull policy
-          image: "rivkayo/triviawaterserver:1.1" # Image from values.yaml
+          image: "rivkayo/triviawaterserver:1.3" # Image from values.yaml
           ports:
             - containerPort: 2024
           env: 

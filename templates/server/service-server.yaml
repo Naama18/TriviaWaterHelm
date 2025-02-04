@@ -11,4 +11,4 @@ spec:
       targetPort: {{ .Values.server.port }}
       protocol: TCP
   selector:
-    app: main-server-service
+    app: deployment-server
