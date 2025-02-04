@@ -5,7 +5,7 @@ metadata:
   labels:
     app: database-app
 spec:
-  replicas: {{ .Values.database.replicaCount }} # Set the number of replicas based on values.yaml
+  replicas: {{ .Values.database.mysql.replicaCount }} # Set the number of replicas based on values.yaml
   selector:
     matchLabels:
       app: deployment-database
@@ -52,13 +52,13 @@ spec:
                   key: DB_HOST 
           resources:
             requests:
-              memory: {{ .Values.default.resources.requests.memory }}
+              memory: {{ .Values.database.mysql.resources.requests.memory }}
               cpu: {{ .Values.default.resources.requests.cpu }}
             limits:
-              memory: {{ .Values.default.resources.limits.memory }}
+              memory: {{ .Values.database.mysql.resources.limits.memory }}
               cpu: {{ .Values.default.resources.limits.cpu }}
           livenessProbe:
-            httpGet:
+            tcpSocket:
               path: /health
               port: {{ .Values.database.mysql.DB_PORT }}
             initialDelaySeconds: 10
@@ -66,7 +66,7 @@ spec:
             timeoutSeconds: 4
             failureThreshold: 3
           readinessProbe:
-            httpGet:
+            tcpSocket:
               path: /readiness
               port: {{ .Values.database.mysql.DB_PORT }}
             initialDelaySeconds: 5
@@ -74,7 +74,7 @@ spec:
             timeoutSeconds: 4
             failureThreshold: 3
           startupProbe:
-            httpGet:
+            tcpSocket:
               path: /health
               port: {{ .Values.database.mysql.DB_PORT }}
             initialDelaySeconds: 5

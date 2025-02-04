@@ -31,8 +31,15 @@ server:
 database:
   service: 
     type: "ClusterIP"
-    port: "3306"
+    port: 3306
   mysql:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "256m"
+      limits:
+        memory: "1Gi"
+        cpu: "512m"
     DB_HOST: "localhost"
     DB_PORT: 3306
     DB_NAME: "trivia_water"

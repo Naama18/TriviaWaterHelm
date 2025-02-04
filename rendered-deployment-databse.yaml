@@ -1,0 +1,342 @@
+---
+# Source: trivia-water-helm-chart/templates/database/secret-db.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-db
+  type: Opaque
+data:
+  DB_USERNAME: cm9vdA==
+  DB_PASSWORD: ejEwbXoxMG0=
+  MYSQL_ROOT_PASSWORD: ejEwbXoxMG0=
+---
+# Source: trivia-water-helm-chart/templates/database/configmap-db.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-db
+  type: Opaque
+data:
+  DB_PORT: "3306"
+  DB_NAME: "trivia_water"
+  DB_HOST: "localhost"
+---
+# Source: trivia-water-helm-chart/templates/client/service-client.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-service
+  labels:
+    app: client-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 5176
+      protocol: TCP
+  selector:
+    app: client-service
+---
+# Source: trivia-water-helm-chart/templates/database/service-db.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-service
+  labels:
+    app: database-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 
+      protocol: TCP
+  selector:
+    app: database-service
+---
+# Source: trivia-water-helm-chart/templates/server/service-server.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-server-service
+  labels:
+    app: main-server-service
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 2024
+      protocol: TCP
+  selector:
+    app: main-server-service
+---
+# Source: trivia-water-helm-chart/templates/client/deployment-client.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-client # Name of the deployment
+  labels:
+    app: client-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: deployment-client
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: deployment-client
+    spec:
+      serviceAccountName: my-privileged-sa
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 0
+      containers:
+        - name: client
+          image: "rivkayo/triviawater:1.6"
+          ports:
+            - containerPort: 5176
+          resources:
+            requests:
+              memory: "50Mi"
+              cpu: "256m"
+            limits:
+              memory: "100Mi"
+              cpu: "512m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5176
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 4
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 5176
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5176
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 10
+---
+# Source: trivia-water-helm-chart/templates/database/deployment-db.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-database # Name of the deployment
+  labels:
+    app: database-app
+spec:
+  replicas:  # Set the number of replicas based on values.yaml
+  selector:
+    matchLabels:
+      app: deployment-database
+  strategy:
+    type: RollingUpdate # Rolling update strategy
+    rollingUpdate:
+      maxSurge: 1 # Max number of Pods to be created over the desired replicas
+      maxUnavailable: 1 # Max number of Pods that can be unavailable during the update
+  template:
+    metadata:
+      labels:
+        app: deployment-database
+    spec:
+      containers:
+        - name: database
+          image: "rivkayo/triviawaterdatabase:1.0" # Image from values.yaml
+          ports:
+            - containerPort: "3306"
+          env:
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: DB_PASSWORD
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: MYSQL_ROOT_PASSWORD
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db
+                  key: DB_NAME
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db
+                  key: DB_HOST 
+          resources:
+            requests:
+              memory: 50Mi
+              cpu: 256m
+            limits:
+              memory: 100Mi
+              cpu: 512m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: "3306"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 4
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: "3306"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: "3306"
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 7
+            failureThreshold: 10
+---
+# Source: trivia-water-helm-chart/templates/server/deployment-server.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-app # Name of the deployment
+  labels:
+    app: deployment-server
+spec:
+  replicas: 3 # Set the number of replicas based on values.yaml
+  selector:
+    matchLabels:
+      app: deployment-server
+  strategy:
+    type: RollingUpdate # Rolling update strategy
+    rollingUpdate:
+      maxSurge: 1 # Max number of Pods to be created over the desired replicas
+      maxUnavailable: 1 # Max number of Pods that can be unavailable during the update
+  template:
+    metadata:
+      labels:
+        app: deployment-server
+    spec:
+      serviceAccountName: my-privileged-sa
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 0
+      containers:
+        - name: server # Container name
+          imagePullPolicy:  # Image pull policy
+          image: "rivkayo/triviawaterserver:1.1" # Image from values.yaml
+          ports:
+            - containerPort: 2024
+          env: 
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: DB_USERNAME
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: DB_PASSWORD
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secret-db
+                  key: MYSQL_ROOT_PASSWORD
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db
+                  key: DB_NAME
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db
+                  key: DB_HOST
+          resources:
+            requests:
+              memory: "50Mi"
+              cpu: "256m"
+            limits:
+              memory: "100Mi"
+              cpu: "512m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 2024
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 4
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 2024
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 2024
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 7
+            failureThreshold: 10
+---
+# Source: trivia-water-helm-chart/templates/route.yaml
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: client-route
+spec:
+  host:
+  to:
+    kind: Service
+    name: service-client
+  port:
+    targetPort: 80
+---
+# Source: trivia-water-helm-chart/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "release-name-trivia-water-helm-chart-test-connection"
+  labels:
+    helm.sh/chart: trivia-water-helm-chart-0.1.0
+    app.kubernetes.io/name: trivia-water-helm-chart
+    app.kubernetes.io/instance: release-name
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['release-name-trivia-water-helm-chart:']
+  restartPolicy: Never
