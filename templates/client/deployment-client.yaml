@@ -37,7 +37,7 @@ spec:
               cpu: "{{ .Values.default.resources.limits.cpu }}"
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: {{ .Values.client.port }}
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -45,7 +45,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /readiness
+              path: /api/health
               port: {{ .Values.client.port }}
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -53,7 +53,7 @@ spec:
             failureThreshold: 3
           startupProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: {{ .Values.client.port }}
             initialDelaySeconds: 5
             periodSeconds: 5

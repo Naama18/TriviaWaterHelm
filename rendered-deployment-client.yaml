@@ -1,5 +1,5 @@
 ---
-# Source: trivia-water-helm-chart/templates/client/roles/service-account.yaml
+# Source: trivia-water-helm-chart/templates/roles/service-account.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -26,20 +26,9 @@ metadata:
 data:
   DB_PORT: "3306"
   DB_NAME: "trivia_water"
-  DB_HOST: "localhost"
+  DB_HOST: "database-service"
 ---
-# Source: trivia-water-helm-chart/templates/client/roles/role.yaml
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: nginx-role
-  namespace: training
-rules:
-  - apiGroups: [""]
-    resources: ["pods", "pods/log"]
-    verbs: ["get", "list", "create"]
----
-# Source: trivia-water-helm-chart/templates/client/roles/rolebinding.yaml
+# Source: trivia-water-helm-chart/templates/roles/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -81,10 +70,10 @@ spec:
   type: ClusterIP
   ports:
     - port: 3306
-      targetPort: 
+      targetPort: 3306
       protocol: TCP
   selector:
-    app: database-service
+    app: database-app
 ---
 # Source: trivia-water-helm-chart/templates/server/service-server.yaml
 apiVersion: v1
@@ -110,8 +99,6 @@ metadata:
   labels:
     app: client-app
 spec:
-  serviceAccountName: my-privileged-sa
-  automountServiceAccountToken: false
   replicas: 3
   selector:
     matchLabels:
@@ -126,6 +113,8 @@ spec:
       labels:
         app: deployment-client
     spec:
+      serviceAccountName: my-privileged-sa
+      automountServiceAccountToken: false
       securityContext:
         runAsUser: 0
       containers:
@@ -142,7 +131,7 @@ spec:
               cpu: "512m"
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 5176
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -150,7 +139,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /readiness
+              path: /api/health
               port: 5176
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -158,7 +147,7 @@ spec:
             failureThreshold: 3
           startupProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 5176
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -173,7 +162,7 @@ metadata:
   labels:
     app: database-app
 spec:
-  replicas:  # Set the number of replicas based on values.yaml
+  replicas: 1 # Set the number of replicas based on values.yaml
   selector:
     matchLabels:
       app: deployment-database
@@ -220,13 +209,13 @@ spec:
                   key: DB_HOST 
           resources:
             requests:
-              memory: 50Mi
+              memory: 512Mi
               cpu: 256m
             limits:
-              memory: 100Mi
+              memory: 1Gi
               cpu: 512m
           livenessProbe:
-            httpGet:
+            tcpSocket:
               path: /health
               port: 3306
             initialDelaySeconds: 10
@@ -234,7 +223,7 @@ spec:
             timeoutSeconds: 4
             failureThreshold: 3
           readinessProbe:
-            httpGet:
+            tcpSocket:
               path: /readiness
               port: 3306
             initialDelaySeconds: 5
@@ -242,7 +231,7 @@ spec:
             timeoutSeconds: 4
             failureThreshold: 3
           startupProbe:
-            httpGet:
+            tcpSocket:
               path: /health
               port: 3306
             initialDelaySeconds: 5
@@ -258,8 +247,6 @@ metadata:
   labels:
     app: deployment-server
 spec:
-  serviceAccountName: my-privileged-sa
-  automountServiceAccountToken: false
   replicas: 3 # Set the number of replicas based on values.yaml
   selector:
     matchLabels:
@@ -274,6 +261,12 @@ spec:
       labels:
         app: deployment-server
     spec:
+      serviceAccountName: my-privileged-sa
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        allowPrivilegeEscalation: true
       containers:
         - name: server # Container name
           imagePullPolicy:  # Image pull policy
@@ -306,6 +299,11 @@ spec:
                 configMapKeyRef:
                   name: configmap-db
                   key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db
+                  key: DB_PORT
           resources:
             requests:
               memory: "50Mi"
@@ -315,7 +313,7 @@ spec:
               cpu: "512m"
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 2024
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -323,7 +321,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /readiness
+              path: /api/health
               port: 2024
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -331,7 +329,7 @@ spec:
             failureThreshold: 3
           startupProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 2024
             initialDelaySeconds: 5
             periodSeconds: 5

@@ -26,7 +26,7 @@ metadata:
 data:
   DB_PORT: "3306"
   DB_NAME: "trivia_water"
-  DB_HOST: "localhost"
+  DB_HOST: "database-service"
 ---
 # Source: trivia-water-helm-chart/templates/roles/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -70,10 +70,10 @@ spec:
   type: ClusterIP
   ports:
     - port: 3306
-      targetPort: 
+      targetPort: 3306
       protocol: TCP
   selector:
-    app: database-service
+    app: database-app
 ---
 # Source: trivia-water-helm-chart/templates/server/service-server.yaml
 apiVersion: v1
@@ -131,7 +131,7 @@ spec:
               cpu: "512m"
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 5176
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -139,7 +139,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /readiness
+              path: /api/health
               port: 5176
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -147,7 +147,7 @@ spec:
             failureThreshold: 3
           startupProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 5176
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -299,6 +299,11 @@ spec:
                 configMapKeyRef:
                   name: configmap-db
                   key: DB_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: configmap-db
+                  key: DB_PORT
           resources:
             requests:
               memory: "50Mi"
@@ -308,7 +313,7 @@ spec:
               cpu: "512m"
           livenessProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 2024
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -316,7 +321,7 @@ spec:
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /readiness
+              path: /api/health
               port: 2024
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -324,7 +329,7 @@ spec:
             failureThreshold: 3
           startupProbe:
             httpGet:
-              path: /health
+              path: /api/health
               port: 2024
             initialDelaySeconds: 5
             periodSeconds: 5

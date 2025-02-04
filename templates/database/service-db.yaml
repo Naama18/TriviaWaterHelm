@@ -8,7 +8,7 @@ spec:
   type: {{ .Values.database.service.type }}
   ports:
     - port: {{ .Values.database.service.port }}
-      targetPort: {{ .Values.database.port }}
+      targetPort: {{ .Values.database.mysql.DB_PORT }}
       protocol: TCP
   selector:
-    app: database-service
+    app: database-app

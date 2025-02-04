@@ -40,7 +40,7 @@ database:
       limits:
         memory: "1Gi"
         cpu: "512m"
-    DB_HOST: "localhost"
+    DB_HOST: "database-service"
     DB_PORT: 3306
     DB_NAME: "trivia_water"
     image:
