@@ -4,6 +4,10 @@ metadata:
   name: database-service
   labels:
     app: database-service
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: my-chart-release
+    meta.helm.sh/release-namespace: training 
 spec:
   type: {{ .Values.database.service.type }}
   ports:

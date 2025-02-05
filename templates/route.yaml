@@ -2,6 +2,11 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: client-route
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: my-chart-release
+    meta.helm.sh/release-namespace: training
 spec:
   to:
     kind: Service

@@ -4,6 +4,10 @@ metadata:
   name: server-app # Name of the deployment
   labels:
     app: deployment-server
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: my-chart-release
+    meta.helm.sh/release-namespace: training
 spec:
   replicas: {{ .Values.server.replicaCount }} # Set the number of replicas based on values.yaml
   selector:
@@ -24,7 +28,7 @@ spec:
       securityContext:
         runAsUser: 0
         runAsGroup: 0
-        allowPrivilegeEscalation: true
+        # allowPrivilegeEscalation: true
       containers:
         - name: server # Container name
           imagePullPolicy: {{ .Values.server.image.pullPolicy }} # Image pull policy

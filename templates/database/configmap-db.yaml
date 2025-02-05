@@ -2,7 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: configmap-db
-  type: Opaque
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: my-chart-release
+    meta.helm.sh/release-namespace: training
 data:
   DB_PORT: "3306"
   DB_NAME: "trivia_water"

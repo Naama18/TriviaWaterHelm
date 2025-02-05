@@ -53,9 +53,11 @@ service:
   clientPort: 8080
   serverPort: 8081
 
-ingress:
+hpa:
   enabled: true
-  host: "myapp.example.com"
-  paths:
-    - /client
-    - /server
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 70
+
+

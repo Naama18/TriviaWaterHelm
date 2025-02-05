@@ -4,6 +4,10 @@ metadata:
   name: client-app # Name of the deployment
   labels:
     app: client-app
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: my-chart-release
+    meta.helm.sh/release-namespace: training
 spec:
   replicas: {{ .Values.client.replicaCount }}
   selector:

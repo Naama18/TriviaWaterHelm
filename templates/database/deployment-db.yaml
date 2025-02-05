@@ -4,6 +4,10 @@ metadata:
   name: database-app # Name of the deployment
   labels:
     app: database-app
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: my-chart-release
+    meta.helm.sh/release-namespace: training
 spec:
   replicas: {{ .Values.database.mysql.replicaCount }} # Set the number of replicas based on values.yaml
   selector:
@@ -59,7 +63,6 @@ spec:
               cpu: {{ .Values.default.resources.limits.cpu }}
           livenessProbe:
             tcpSocket:
-              path: /health
               port: {{ .Values.database.mysql.DB_PORT }}
             initialDelaySeconds: 10
             periodSeconds: 10
@@ -67,7 +70,6 @@ spec:
             failureThreshold: 3
           readinessProbe:
             tcpSocket:
-              path: /readiness
               port: {{ .Values.database.mysql.DB_PORT }}
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -75,7 +77,6 @@ spec:
             failureThreshold: 3
           startupProbe:
             tcpSocket:
-              path: /health
               port: {{ .Values.database.mysql.DB_PORT }}
             initialDelaySeconds: 5
             periodSeconds: 5

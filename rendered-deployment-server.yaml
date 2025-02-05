@@ -5,6 +5,11 @@ kind: ServiceAccount
 metadata:
   name: my-privileged-sa
   namespace: training
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    meta.helm.sh/release-name: my-chart-release
+    meta.helm.sh/release-namespace: training
 ---
 # Source: trivia-water-helm-chart/templates/database/secret-db.yaml
 apiVersion: v1
