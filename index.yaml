@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  trivia-water-helm-chart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-02-05T14:44:17.202887512+02:00"
+    description: A Helm chart for Kubernetes
+    digest: 38c11dc289eb500cbbf8306a7d673d422c265a89ce68374b6a096f6300bcad7f
+    name: trivia-water-helm-chart
+    type: application
+    urls:
+    - https://github.com/RivkaYo/TriviaWaterHelm.git/trivia-water-helm-chart-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-02-05T14:44:17.202278057+02:00"
