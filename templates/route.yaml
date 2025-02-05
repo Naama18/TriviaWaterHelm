@@ -3,9 +3,8 @@ kind: Route
 metadata:
   name: client-route
 spec:
-  host:
   to:
     kind: Service
-    name: service-client
+    name: client-service
   port:
     targetPort: 80
