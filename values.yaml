@@ -7,7 +7,7 @@ route:
 ingress:
   enabled: false
 
-  default:
+default:
   resources:
     requests:
       memory: "50Mi"
